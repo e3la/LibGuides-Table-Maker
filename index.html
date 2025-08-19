@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LibGuides Accessible Table Maker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              'brand-primary': '#4F46E5',   // indigo-600
+              'brand-secondary': '#4338CA', // indigo-700
+              'brand-accent': '#6366F1',    // indigo-500
+              'brand-light': '#EEF2FF',     // indigo-50
+            }
+          }
+        }
+      }
+    </script>
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.1.1",
+    "react-dom/": "https://esm.sh/react-dom@^19.1.1/",
+    "react/": "https://esm.sh/react@^19.1.1/"
+  }
+}
+</script>
+</head>
+  <body class="bg-slate-100 text-slate-800">
+    <div id="root"></div>
+    
+    <!-- Load React and ReactDOM UMD builds -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    
+    <!-- Babel Standalone for in-browser JSX transformation -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- Load Application Files - Order is important! -->
+    <script type="text/babel" src="utils/parser.ts"></script>
+    <script type="text/babel" src="utils/generator.ts"></script>
+    <script type="text/babel" src="components/icons.tsx"></script>
+    <script type="text/babel" src="components/Header.tsx"></script>
+    <script type="text/babel" src="components/DataInput.tsx"></script>
+    <script type="text/babel" src="components/TablePreview.tsx"></script>
+    <script type="text/babel" src="components/CodeOutput.tsx"></script>
+    <script type="text/babel" src="components/CustomizationOptions.tsx"></script>
+    <script type="text/babel" src="App.tsx"></script>
+    
+    <!-- Entry point to render the app -->
+    <script type="text/babel" src="index.tsx"></script>
+  </body>
+</html>

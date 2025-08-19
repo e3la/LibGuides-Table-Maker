@@ -1,0 +1,5 @@
+{
+  "name": "LibGuides Accessible Table Maker",
+  "description": "An application to generate searchable, sortable, and accessible HTML tables for LibGuides from CSV data. Users can upload a CSV file or paste raw table data, preview the interactive table, and copy the self-contained HTML code for easy embedding.",
+  "requestFramePermissions": []
+}

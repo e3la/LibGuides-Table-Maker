@@ -1,0 +1,21 @@
+{
+  "name": "libguides-accessible-table-maker",
+  "version": "1.0.0",
+  "description": "An application to generate searchable, sortable, and accessible HTML tables for LibGuides from CSV data. Users can upload a CSV file or paste raw table data, preview the interactive table, and copy the self-contained HTML code for easy embedding.",
+  "private": true,
+  "main": "index.html",
+  "scripts": {
+    "start": "serve .",
+    "check-types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "serve": "^14.2.1",
+    "typescript": "^5.3.3"
+  }
+}
