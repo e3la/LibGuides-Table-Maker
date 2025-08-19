@@ -1,56 +1,953 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>LibGuides Accessible Table Maker</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              'brand-primary': '#4F46E5',   // indigo-600
-              'brand-secondary': '#4338CA', // indigo-700
-              'brand-accent': '#6366F1',    // indigo-500
-              'brand-light': '#EEF2FF',     // indigo-50
-            }
-          }
+    <style>
+        :root {
+            --brand-primary: #4F46E5;
+            --brand-secondary: #4338CA;
+            --brand-accent: #6366F1;
+            --brand-light: #EEF2FF;
+            --slate-50: #f8fafc;
+            --slate-100: #f1f5f9;
+            --slate-200: #e2e8f0;
+            --slate-300: #cbd5e1;
+            --slate-400: #94a3b8;
+            --slate-500: #64748b;
+            --slate-600: #475569;
+            --slate-700: #334155;
+            --slate-800: #1e293b;
+            --slate-900: #0f172a;
+            --green-600: #16a34a;
+            --red-50: #fef2f2;
+            --red-300: #fca5a5;
+            --red-800: #991b1b;
+            --amber-50: #fffbeb;
+            --amber-200: #fde68a;
+            --amber-700: #b45309;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --ring-color: rgba(99, 102, 241, 0.5);
         }
-      }
-    </script>
-<script type="importmap">
-{
-  "imports": {
-    "react": "https://esm.sh/react@^19.1.1",
-    "react-dom/": "https://esm.sh/react-dom@^19.1.1/",
-    "react/": "https://esm.sh/react@^19.1.1/"
-  }
-}
-</script>
-</head>
-  <body class="bg-slate-100 text-slate-800">
-    <div id="root"></div>
-    
-    <!-- Load React and ReactDOM UMD builds -->
-    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
-    
-    <!-- Babel Standalone for in-browser JSX transformation -->
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-    <!-- Load Application Files - Order is important! -->
-    <script type="text/babel" src="utils/parser.ts"></script>
-    <script type="text/babel" src="utils/generator.ts"></script>
-    <script type="text/babel" src="components/icons.tsx"></script>
-    <script type="text/babel" src="components/Header.tsx"></script>
-    <script type="text/babel" src="components/DataInput.tsx"></script>
-    <script type="text/babel" src="components/TablePreview.tsx"></script>
-    <script type="text/babel" src="components/CodeOutput.tsx"></script>
-    <script type="text/babel" src="components/CustomizationOptions.tsx"></script>
-    <script type="text/babel" src="App.tsx"></script>
+        /* Basic Reset & Typography */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        html {
+            line-height: 1.5;
+            -webkit-text-size-adjust: 100%;
+            -moz-tab-size: 4;
+            tab-size: 4;
+            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background-color: var(--slate-100);
+            color: var(--slate-800);
+        }
+        
+        button {
+            cursor: pointer;
+            background-color: transparent;
+            border: none;
+            padding: 0;
+            font-family: inherit;
+            font-size: 100%;
+            line-height: inherit;
+            color: inherit;
+        }
+        
+        button:disabled {
+            cursor: not-allowed;
+        }
+
+        h1, h2 {
+            margin: 0;
+            font-weight: 700;
+        }
+
+        h1 {
+            font-size: 1.875rem;
+            line-height: 2.25rem;
+        }
+        
+        h2 {
+            font-size: 1.5rem;
+            line-height: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        textarea, input, select {
+            font-family: inherit;
+            font-size: 100%;
+            line-height: inherit;
+            color: inherit;
+            margin: 0;
+            border: 1px solid var(--slate-300);
+            border-radius: 0.375rem;
+            padding: 0.5rem 0.75rem;
+        }
+
+        textarea:focus, input:focus, select:focus, input[type="checkbox"]:focus {
+             outline: 2px solid transparent;
+             outline-offset: 2px;
+             --tw-ring-offset-shadow: 0 0 #0000;
+             --tw-ring-shadow: 0 0 0 2px var(--ring-color);
+             box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), 0 0 #0000;
+             border-color: var(--brand-accent);
+        }
+        
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+
+
+        /* Layout */
+        .container {
+            width: 100%;
+            max-width: 1280px;
+            margin-left: auto;
+            margin-right: auto;
+            padding: 1rem;
+        }
+        main.container {
+            display: grid;
+            gap: 2rem;
+        }
+        @media (min-width: 768px) {
+            .container { padding: 2rem; }
+        }
+
+        /* Reusable Components */
+        .card {
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: var(--shadow-lg);
+            padding: 1.5rem;
+            border: 1px solid var(--slate-200);
+        }
+        .grid-layout {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+        @media (min-width: 1024px) {
+            .grid-layout { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+        .flex-center {
+            display: flex;
+            align-items: center;
+        }
+
+        /* Header */
+        header {
+            background-color: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(4px);
+            border-bottom: 1px solid var(--slate-200);
+            box-shadow: var(--shadow-sm);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        header .container {
+            display: flex;
+            align-items: center;
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+        }
+        header h1 {
+            margin-left: 0.75rem;
+        }
+        @media (min-width: 768px) {
+            h1 { font-size: 1.875rem; }
+        }
+
+        /* Icons */
+        .icon {
+            display: inline-block;
+            vertical-align: middle;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        .icon-lg {
+            width: 2rem;
+            height: 2rem;
+        }
+        .icon-md {
+            width: 1.5rem;
+            height: 1.5rem;
+        }
+        .icon-sm {
+            width: 1.25rem;
+            height: 1.25rem;
+        }
+         .icon-xs {
+            width: 1rem;
+            height: 1rem;
+        }
+        .icon-brand {
+            color: var(--brand-primary);
+        }
+        
+        /* Data Input Section */
+        #data-input .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--slate-200);
+            margin-bottom: 1rem;
+        }
+        #data-input .tab-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.5rem 1rem;
+            margin-bottom: -1px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            border-bottom: 2px solid transparent;
+            transition: color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+            color: var(--slate-500);
+        }
+        #data-input .tab-button:hover {
+             color: var(--slate-800);
+             border-color: var(--slate-300);
+        }
+        #data-input .tab-button.active {
+            color: var(--brand-primary);
+            border-color: var(--brand-primary);
+        }
+        #data-input .tab-button .icon {
+            margin-right: 0.5rem;
+        }
+
+        #error-message {
+            background-color: var(--red-50);
+            border: 1px solid var(--red-300);
+            color: var(--red-800);
+            padding: 0.75rem 1rem;
+            border-radius: 0.375rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--slate-700);
+        }
+
+        .textarea {
+            width: 100%;
+            background-color: var(--slate-100);
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+
+        .button {
+            padding: 0.5rem 1.5rem;
+            font-weight: 600;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: background-color 0.2s;
+        }
+        .button-primary {
+            background-color: var(--brand-primary);
+            color: white;
+        }
+        .button-primary:hover {
+             background-color: var(--brand-secondary);
+        }
+        .button-primary:disabled {
+            background-color: var(--slate-400);
+        }
+        .button-secondary {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            background-color: var(--slate-200);
+            color: var(--slate-700);
+            border-radius: 0.5rem;
+        }
+        .button-secondary .icon {
+            margin-right: 0.5rem;
+        }
+        .button-secondary:hover {
+            background-color: var(--slate-300);
+        }
+        
+        .input-group {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .upload-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 8rem;
+            border: 2px dashed var(--slate-300);
+            border-radius: 0.5rem;
+            cursor: pointer;
+            background-color: var(--slate-50);
+            transition: background-color 0.2s;
+        }
+        .upload-area:hover {
+            background-color: var(--slate-100);
+        }
+        .upload-area .icon {
+            width: 2.5rem;
+            height: 2.5rem;
+            margin-bottom: 0.75rem;
+            color: var(--slate-400);
+        }
+        .upload-area p {
+            margin: 0;
+            font-size: 0.875rem;
+            color: var(--slate-500);
+        }
+        .upload-area .font-semibold { font-weight: 600; }
+        .upload-area .text-xs { font-size: 0.75rem; }
+
+        #file-name-display {
+            font-size: 0.875rem;
+            color: var(--green-600);
+        }
+
+        /* Customization Options */
+        #customization-options-form {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+        @media (min-width: 768px) {
+             #customization-options-form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+         @media (min-width: 1024px) {
+             #customization-options-form { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group-full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-input, .form-select {
+            width: 100%;
+            background-color: var(--slate-100);
+        }
+
+        .form-hint {
+            font-size: 0.75rem;
+            color: var(--slate-500);
+        }
+        .warning-hint {
+            font-size: 0.75rem;
+            color: var(--amber-700);
+            background-color: var(--amber-50);
+            border: 1px solid var(--amber-200);
+            border-radius: 0.375rem;
+            padding: 0.5rem;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            cursor: pointer;
+        }
+        .checkbox {
+            height: 1rem;
+            width: 1rem;
+            border-radius: 0.25rem;
+            border-color: var(--slate-300);
+            color: var(--brand-primary);
+        }
+        
+        .checkbox-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 0.75rem;
+            margin-top: 0.25rem;
+        }
+        
+        .checkbox-grid .checkbox-group {
+            font-size: 0.875rem;
+        }
+
+
+        /* Table Preview */
+        #preview-search-input {
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+        #table-preview-wrapper {
+            overflow-x: auto;
+        }
+        #table-preview {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        #table-preview thead tr {
+            background-color: var(--slate-100);
+        }
+        #table-preview th, #table-preview td {
+            padding: 0.5rem;
+            border: 1px solid var(--slate-300);
+            text-align: left;
+        }
+        #table-preview th .sort-button {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+        }
+        #table-preview th .sort-indicator {
+            margin-left: 0.5rem;
+            color: var(--slate-500);
+        }
+        #table-preview tbody tr:nth-child(even) {
+            background-color: var(--slate-50);
+        }
+
+        /* Code Output */
+        #code-output-container {
+            position: relative;
+        }
+        #code-output-container .form-hint {
+            margin-bottom: 0.5rem;
+        }
+        #generated-html-code {
+            width: 100%;
+            height: 24rem;
+            background-color: var(--slate-900);
+            border-color: var(--slate-700);
+            border-radius: 0.375rem;
+            padding: 1rem;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            font-size: 0.875rem;
+            color: var(--slate-300);
+            resize: vertical;
+        }
+        #copy-button {
+            position: absolute;
+            top: 2.75rem;
+            right: 0.75rem;
+            padding: 0.375rem 0.75rem;
+            font-size: 0.875rem;
+            background-color: var(--slate-700);
+            color: var(--slate-200);
+            border-radius: 0.375rem;
+            transition: all 0.2s ease-in-out;
+            display: flex;
+            align-items: center;
+        }
+        #copy-button:hover {
+             background-color: var(--slate-600);
+        }
+         #copy-button .icon {
+            margin-right: 0.25rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <svg class="icon icon-lg icon-brand" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+            <h1>LibGuides Accessible Table Maker</h1>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Data Input -->
+        <div id="data-input" class="card">
+            <div class="tabs">
+                <button id="tab-paste" class="tab-button active">
+                    <svg class="icon icon-sm" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                    Paste Data
+                </button>
+                <button id="tab-upload" class="tab-button">
+                    <svg class="icon icon-sm" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                    Upload CSV
+                </button>
+            </div>
+            
+            <div id="error-message" style="display: none;"></div>
+
+            <div id="paste-mode-content">
+                <div class="form-group">
+                    <label for="paste-area" class="form-label">Paste your table data here (from a spreadsheet or CSV):</label>
+                    <textarea id="paste-area" rows="8" class="textarea" placeholder="You can paste data directly from Google Sheets, Excel, or as comma-separated values.&#10;Header1,Header2,Header3&#10;Data1A,Data1B,Data1C"></textarea>
+                </div>
+                <div class="input-group" style="margin-top: 1rem;">
+                    <button id="generate-button" class="button button-primary" disabled>Generate Table</button>
+                    <button id="clear-button-paste" class="button-secondary">
+                        <svg class="icon icon-sm" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        Clear
+                    </button>
+                </div>
+            </div>
+
+            <div id="upload-mode-content" style="display: none;">
+                 <p class="form-label">Select a .csv file to process:</p>
+                 <label for="csv-upload" class="upload-area">
+                     <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                     <p><span class="font-semibold">Click to upload</span> or drag and drop</p>
+                     <p class="text-xs">CSV files only</p>
+                 </label>
+                 <input id="csv-upload" type="file" accept=".csv" class="sr-only" />
+                 <p id="file-name-display" style="margin-top: 0.5rem;"></p>
+                 <button id="clear-button-upload" class="button-secondary" style="margin-top: 1rem;">
+                    <svg class="icon icon-sm" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    Clear
+                 </button>
+            </div>
+        </div>
+
+        <!-- This container is hidden until data is processed -->
+        <div id="output-container" style="display: none;">
+            <!-- Customization Options -->
+            <div class="card">
+                <h2 class="flex-center">
+                    <svg class="icon icon-md icon-brand" style="margin-right: 0.5rem;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    Customization Options
+                </h2>
+                <form id="customization-options-form">
+                    <div class="form-group">
+                        <label for="table-caption" class="form-label">Table Caption</label>
+                        <input type="text" id="table-caption" class="form-input" value="A descriptive title for your table.">
+                        <p class="form-hint">A descriptive caption is important for accessibility.</p>
+                    </div>
+                    <div class="form-group">
+                        <label for="table-theme" class="form-label">Color Theme</label>
+                        <select id="table-theme" class="form-select">
+                            <option value="light">Light (Default)</option>
+                            <option value="dark">Dark</option>
+                            <option value="high-contrast">High Contrast</option>
+                        </select>
+                         <p class="form-hint">Choose a visual theme for the table.</p>
+                    </div>
+                    <div class="form-group" style="padding-top: 0.5rem; gap: 0.75rem;">
+                        <label class="checkbox-group">
+                            <input type="checkbox" id="striped-rows" class="checkbox" checked>
+                            <span class="form-label">Enable Striped Rows</span>
+                        </label>
+                        <label class="checkbox-group">
+                            <input type="checkbox" id="strip-html" class="checkbox" checked>
+                            <span class="form-label">Strip HTML from cells</span>
+                        </label>
+                        <p id="strip-html-warning" class="warning-hint" style="display: none;">Warning: Disabling this allows raw HTML. Ensure your content is trusted to avoid XSS risks.</p>
+                    </div>
+                    <div class="form-group form-group-full-width">
+                        <label class="form-label">Visible Columns</label>
+                        <div id="column-visibility-controls" class="checkbox-grid">
+                            <!-- Checkboxes are dynamically inserted here -->
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="grid-layout">
+                <!-- Interactive Preview -->
+                <div class="card">
+                    <h2 class="flex-center">
+                        <svg class="icon icon-md icon-brand" style="margin-right: 0.5rem;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                        Interactive Preview
+                    </h2>
+                    <label for="preview-search-input" class="sr-only">Search table</label>
+                    <input id="preview-search-input" type="search" placeholder="Filter rows...">
+                    <div id="table-preview-wrapper">
+                        <table id="table-preview">
+                            <thead></thead>
+                            <tbody></tbody>
+                        </table>
+                         <p id="preview-no-results" style="text-align: center; padding: 1rem; color: var(--slate-500); display: none;">No matching rows found.</p>
+                    </div>
+                </div>
+
+                <!-- Generated Code -->
+                <div id="code-output-container" class="card">
+                     <h2 class="flex-center">
+                        <svg class="icon icon-md icon-brand" style="margin-right: 0.5rem;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
+                        Generated Code
+                    </h2>
+                    <p class="form-hint">Copy this code and paste it into a "Media/Widget" asset in LibGuides.</p>
+                    <textarea id="generated-html-code" readonly aria-label="Generated HTML code"></textarea>
+                    <button id="copy-button" aria-live="polite">
+                        <svg class="icon icon-xs" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                        <span id="copy-button-text">Copy Code</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    // --- STATE MANAGEMENT ---
+    let tableData = null;
+    let visibleColumnIndices = new Set();
+    let customizationOptions = {
+        tableCaption: 'A descriptive title for your table.',
+        stripHtml: true,
+        tableTheme: 'light',
+        stripedRows: true,
+    };
+
+    // --- DOM ELEMENT REFERENCES ---
+    const getEl = (id) => document.getElementById(id);
+
+    const tabPaste = getEl('tab-paste');
+    const tabUpload = getEl('tab-upload');
+    const pasteModeContent = getEl('paste-mode-content');
+    const uploadModeContent = getEl('upload-mode-content');
+    const pasteArea = getEl('paste-area');
+    const generateButton = getEl('generate-button');
+    const clearButtonPaste = getEl('clear-button-paste');
+    const clearButtonUpload = getEl('clear-button-upload');
+    const csvUpload = getEl('csv-upload');
+    const fileNameDisplay = getEl('file-name-display');
+    const errorMessage = getEl('error-message');
+    const outputContainer = getEl('output-container');
     
-    <!-- Entry point to render the app -->
-    <script type="text/babel" src="index.tsx"></script>
-  </body>
+    // Customization form elements
+    const customizationForm = getEl('customization-options-form');
+    const captionInput = getEl('table-caption');
+    const themeSelect = getEl('table-theme');
+    const stripedRowsCheckbox = getEl('striped-rows');
+    const stripHtmlCheckbox = getEl('strip-html');
+    const stripHtmlWarning = getEl('strip-html-warning');
+    const columnVisibilityControls = getEl('column-visibility-controls');
+
+    // Preview elements
+    const previewSearchInput = getEl('preview-search-input');
+    const tablePreviewThead = getEl('table-preview').querySelector('thead');
+    const tablePreviewTbody = getEl('table-preview').querySelector('tbody');
+    const previewNoResults = getEl('preview-no-results');
+
+    // Code output elements
+    const generatedHtmlCode = getEl('generated-html-code');
+    const copyButton = getEl('copy-button');
+    const copyButtonText = getEl('copy-button-text');
+    const copyButtonIcon = copyButton.querySelector('svg');
+
+    // --- CORE LOGIC FUNCTIONS ---
+
+    const parseTableData = (text) => {
+        const trimmedText = text.trim();
+        if (!trimmedText) return { headers: [], rows: [] };
+
+        const lines = trimmedText.split(/\r?\n/).filter(line => line.trim() !== '');
+        if (lines.length === 0) return { headers: [], rows: [] };
+
+        const separator = lines[0].includes('\t') ? '\t' : ',';
+        const splitLine = (line) => {
+            if (separator === '\t') return line.split('\t');
+            return line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+        };
+        const cleanCell = (cell) => cell.trim().replace(/^"(.+(?="$))"$/, '$1');
+
+        const headers = splitLine(lines[0]).map(cleanCell);
+        const rows = lines.slice(1).map(line => {
+            const row = splitLine(line).map(cleanCell);
+            return row.length === headers.length ? row : null;
+        }).filter(row => row !== null && row.some(cell => cell.trim() !== ''));
+
+        return { headers, rows };
+    };
+    
+    const simpleStripHtml = (html) => {
+        const doc = new DOMParser().parseFromString(html, 'text/html');
+        return doc.body.textContent || "";
+    }
+
+    const getFilteredData = () => {
+        if (!tableData) return { headers: [], rows: [] };
+        
+        const visibleIndicesArray = Array.from(visibleColumnIndices).sort((a, b) => a - b);
+
+        const filteredHeaders = tableData.headers.filter((_, index) => visibleColumnIndices.has(index));
+        
+        const filteredRows = tableData.rows.map(row => 
+            row.filter((_, index) => visibleColumnIndices.has(index))
+        );
+
+        return { headers: filteredHeaders, rows: filteredRows };
+    };
+
+    const generateTableHtml = (data, options) => {
+        const { headers, rows } = data;
+        const { tableCaption, stripHtml: shouldStripHtml, tableTheme, stripedRows } = options;
+        
+        if (headers.length === 0) return '';
+
+        const tableId = `lg-table-${Date.now()}`;
+        
+        const escapeHtml = (unsafe) => unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        const getCellContent = (cell) => shouldStripHtml ? escapeHtml(simpleStripHtml(cell)) : cell;
+
+        const themes = {
+            light: `--table-bg-color:#ffffff;--table-text-color:#212529;--table-border-color:#dee2e6;--table-header-bg:#f8f9fa;--table-header-text:#212529;--table-stripe-bg:#f2f2f2;--table-hover-bg:#e9ecef;--table-focus-ring:#86b7fe;--table-search-bg:#ffffff;--table-search-border:#ced4da;`,
+            dark: `--table-bg-color:#212529;--table-text-color:#f8f9fa;--table-border-color:#495057;--table-header-bg:#343a40;--table-header-text:#f8f9fa;--table-stripe-bg:#2c3034;--table-hover-bg:#343a40;--table-focus-ring:#86b7fe;--table-search-bg:#343a40;--table-search-border:#495057;`,
+            'high-contrast': `--table-bg-color:#ffffff;--table-text-color:#000000;--table-border-color:#000000;--table-header-bg:#e0e0e0;--table-header-text:#000000;--table-stripe-bg:#f0f0f0;--table-hover-bg:#d0d0d0;--table-focus-ring:#0000ff;--table-search-bg:#ffffff;--table-search-border:#000000;`,
+        };
+        const tableHeaders = headers.map(header => `<th scope="col"><button class="lg-table-sort-btn">${escapeHtml(header)}<span class="sort-indicator" aria-hidden="true"></span></button></th>`).join('');
+        const tableRows = rows.map(row => `<tr>${row.map(cell => `<td>${getCellContent(cell)}</td>`).join('')}</tr>`).join('');
+
+        return `<!-- LibGuides Accessible Table START -->
+<style>:root{${themes[tableTheme]}}#${tableId}-container{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;color:var(--table-text-color)}#${tableId}-search-label{display:block;font-weight:600;margin-bottom:.5rem}#${tableId}-search{width:100%;padding:.5rem .75rem;font-size:1rem;border:1px solid var(--table-search-border);border-radius:.25rem;background-color:var(--table-search-bg);color:var(--table-text-color);margin-bottom:1rem;box-sizing:border-box;transition:border-color .15s ease-in-out,box-shadow .15s ease-in-out}#${tableId}-search:focus{outline:0;border-color:var(--table-focus-ring);box-shadow:0 0 0 .25rem rgba(13,110,253,.25)}#${tableId}-wrapper{overflow-x:auto}#${tableId}{width:100%;border-collapse:collapse;background-color:var(--table-bg-color)}#${tableId} caption{caption-side:top;padding:.5rem;font-size:1.25rem;font-weight:700;text-align:left;color:var(--table-header-text)}#${tableId} th,#${tableId} td{padding:.75rem;border:1px solid var(--table-border-color);text-align:left;vertical-align:top}#${tableId} thead th{background-color:var(--table-header-bg);font-weight:700;color:var(--table-header-text)}${stripedRows?`#${tableId} tbody tr:nth-of-type(odd){background-color:var(--table-stripe-bg)}#${tableId} tbody tr:nth-of-type(even){background-color:var(--table-bg-color)}`:`#${tableId} tbody tr{background-color:var(--table-bg-color)}`}#${tableId} tbody tr:hover{background-color:var(--table-hover-bg)}.lg-table-sort-btn{display:flex;justify-content:space-between;align-items:center;width:100%;background:0 0;border:none;font:inherit;color:inherit;text-align:left;cursor:pointer;padding:0}.lg-table-sort-btn:focus-visible{outline:2px solid var(--table-focus-ring);outline-offset:2px}.lg-table-sort-btn .sort-indicator{display:inline-block;width:1em;height:1em;margin-left:.5rem;opacity:.5;background-repeat:no-repeat;background-position:50%;background-size:contain;background-image:url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 512'%3e%3cpath fill='currentColor' d='M41 288h238c21.4 0 32.1 25.9 17 41L177 448c-9.4 9.4-24.6 9.4-33.9 0L24 329c-15.1-15.1-4.4-41 17-41zm255-105L177 64c-9.4-9.4-24.6-9.4-33.9 0L24 183c-15.1-15.1-4.4-41 17-41h238c21.4 0 32.1-25.9 17-41z'/%3e%3c/svg%3e")}th[aria-sort] .sort-indicator{opacity:1}th[aria-sort=ascending] .sort-indicator{background-image:url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 512'%3e%3cpath fill='currentColor' d='M279 224H41c-21.4 0-32.1-25.9-17-41L143 64c9.4-9.4 24.6-9.4 33.9 0l119 119c15.2 15.1 4.5 41-16.9 41z'/%3e%3c/svg%3e")}th[aria-sort=descending] .sort-indicator{background-image:url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 512'%3e%3cpath fill='currentColor' d='M41 288h238c21.4 0 32.1 25.9 17 41L177 448c-9.4 9.4-24.6 9.4-33.9 0L24 329c-15.1-15.1-4.4-41 17-41z'/%3e%3c/svg%3e")}</style>
+<div id="${tableId}-container">
+<label for="${tableId}-search" id="${tableId}-search-label">Search this table:</label>
+<input type="search" id="${tableId}-search" placeholder="Filter rows...">
+<div id="${tableId}-wrapper"><table id="${tableId}"><caption>${escapeHtml(tableCaption)}</caption><thead><tr>${tableHeaders}</tr></thead><tbody>${tableRows}</tbody></table></div></div>
+<script>!function(){const t=document.getElementById("${tableId}-container");if(!t)return;const e=t.querySelector("#${tableId}-search"),o=t.querySelector("#${tableId}"),r=o.querySelector("tbody"),n=Array.from(r.querySelectorAll("tr")),c=Array.from(o.querySelectorAll("thead th"));e.addEventListener("keyup",t=>{const e=t.target.value.toLowerCase();n.forEach(t=>{const o=t.textContent.toLowerCase();t.style.display=o.includes(e)?"":"none"})}),c.forEach((t,e)=>{const o=t.querySelector(".lg-table-sort-btn");o&&o.addEventListener("click",()=>{let a="ascending";"ascending"===t.getAttribute("aria-sort")&&(a="descending");const i=Array.from(n).every(t=>{const o=t.children[e]?.textContent?.trim()||"";return""===o||!isNaN(parseFloat(o.replace(/[,\\$]/g,"")))}),s=Array.from(n).sort((t,o)=>{const r=t.children[e]?.textContent?.trim()||"",n=o.children[e]?.textContent?.trim()||"";let c=r,l=n;return i&&(c=parseFloat(r.replace(/[,\\$]/g,""))||0,l=parseFloat(n.replace(/[,\\$]/g,""))||0),c<l?-1:c>l?1:0});"descending"===a&&s.reverse(),c.forEach(t=>t.removeAttribute("aria-sort")),t.setAttribute("aria-sort",a),r.innerHTML="",s.forEach(t=>r.appendChild(t))})})}();<\/script>
+<!-- LibGuides Accessible Table END -->`;
+    };
+
+    // --- UI UPDATE & RENDER FUNCTIONS ---
+    
+    function showError(message) {
+        errorMessage.textContent = message;
+        errorMessage.style.display = 'block';
+    }
+
+    function hideError() {
+        errorMessage.style.display = 'none';
+    }
+
+    function handleDataParsed(data) {
+        if (data.headers.length > 0 && data.rows.length > 0) {
+            tableData = data;
+            visibleColumnIndices = new Set(data.headers.map((_, i) => i));
+            hideError();
+            renderColumnVisibilityControls();
+            updateUI();
+        } else {
+            tableData = null;
+            showError('Parsed data is empty or invalid. Please check your input.');
+            updateUI();
+        }
+    }
+    
+    function clearAll() {
+        tableData = null;
+        visibleColumnIndices.clear();
+        pasteArea.value = '';
+        csvUpload.value = '';
+        if (fileNameDisplay) {
+            fileNameDisplay.textContent = '';
+        }
+        generateButton.disabled = true;
+        hideError();
+        renderColumnVisibilityControls();
+        updateUI();
+    }
+
+    function updateUI() {
+        if (tableData) {
+            outputContainer.style.display = 'grid';
+            const filteredData = getFilteredData();
+            generatedHtmlCode.value = generateTableHtml(filteredData, customizationOptions);
+            renderPreview(filteredData);
+        } else {
+            outputContainer.style.display = 'none';
+        }
+    }
+
+    function renderColumnVisibilityControls() {
+        columnVisibilityControls.innerHTML = '';
+        if (!tableData) return;
+
+        tableData.headers.forEach((header, index) => {
+            const id = `col-vis-${index}`;
+            const label = document.createElement('label');
+            label.className = 'checkbox-group';
+            label.innerHTML = `
+                <input type="checkbox" id="${id}" class="checkbox" data-index="${index}" ${visibleColumnIndices.has(index) ? 'checked' : ''}>
+                <span class="form-label">${header || `Column ${index + 1}`}</span>
+            `;
+            columnVisibilityControls.appendChild(label);
+        });
+    }
+    
+    // Preview rendering logic
+    let previewState = { searchTerm: '', sortColumn: null, sortDirection: 'none' };
+    
+    function renderPreview(data) {
+        if (!data) return;
+
+        let dataToRender = {
+            ...data,
+            rows: customizationOptions.stripHtml 
+                ? data.rows.map(row => row.map(simpleStripHtml)) 
+                : data.rows,
+        };
+        
+        // Filter
+        const filteredRows = previewState.searchTerm
+            ? dataToRender.rows.filter(row => row.some(cell => String(cell).toLowerCase().includes(previewState.searchTerm.toLowerCase())))
+            : dataToRender.rows;
+        
+        // Sort
+        let sortedRows = [...filteredRows];
+        if (previewState.sortColumn !== null && previewState.sortDirection !== 'none' && dataToRender.headers.length > 0) {
+            const colIndex = previewState.sortColumn;
+            sortedRows.sort((a, b) => {
+                const valA = a[colIndex], valB = b[colIndex];
+                const isNumeric = !isNaN(parseFloat(valA)) && !isNaN(parseFloat(valB));
+                let comparison = 0;
+                if (isNumeric) {
+                    comparison = parseFloat(valA) - parseFloat(valB);
+                } else {
+                    comparison = String(valA).localeCompare(String(valB), undefined, { sensitivity: 'base' });
+                }
+                return previewState.sortDirection === 'desc' ? -comparison : comparison;
+            });
+        }
+        
+        // Render headers
+        tablePreviewThead.innerHTML = `<tr>${dataToRender.headers.map((h, i) => {
+            let indicator = '&#8597;'; // Up-down arrow
+            if (previewState.sortColumn === i) {
+                indicator = previewState.sortDirection === 'asc' ? '&#8593;' : '&#8595;';
+            }
+            return `<th><button class="sort-button" data-index="${i}">${h}<span class="sort-indicator">${indicator}</span></button></th>`;
+        }).join('')}</tr>`;
+        
+        // Render rows
+        tablePreviewTbody.innerHTML = sortedRows.map(row => `<tr>${row.map(cell => `<td>${cell}</td>`).join('')}</tr>`).join('');
+        
+        previewNoResults.style.display = sortedRows.length === 0 ? 'block' : 'none';
+        getEl('table-preview').style.display = dataToRender.headers.length > 0 ? '' : 'none';
+    }
+
+
+    // --- EVENT LISTENERS ---
+
+    // Tab switching
+    tabPaste.addEventListener('click', () => {
+        tabPaste.classList.add('active');
+        tabUpload.classList.remove('active');
+        pasteModeContent.style.display = 'block';
+        uploadModeContent.style.display = 'none';
+    });
+    tabUpload.addEventListener('click', () => {
+        tabUpload.classList.add('active');
+        tabPaste.classList.remove('active');
+        uploadModeContent.style.display = 'block';
+        pasteModeContent.style.display = 'none';
+    });
+    
+    // Paste input
+    pasteArea.addEventListener('input', () => {
+        generateButton.disabled = pasteArea.value.trim() === '';
+    });
+    
+    generateButton.addEventListener('click', () => {
+        handleDataParsed(parseTableData(pasteArea.value));
+    });
+
+    // File input
+    csvUpload.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            fileNameDisplay.textContent = `File selected: ${file.name}`;
+            const reader = new FileReader();
+            reader.onload = (e) => handleDataParsed(parseTableData(e.target.result));
+            reader.readAsText(file);
+        }
+    });
+
+    // Clear buttons
+    clearButtonPaste.addEventListener('click', clearAll);
+    clearButtonUpload.addEventListener('click', clearAll);
+
+    // Customization options
+    const onOptionChange = (event) => {
+        if (event.target.closest('#column-visibility-controls')) return; // Handled separately
+        customizationOptions = {
+            tableCaption: captionInput.value,
+            tableTheme: themeSelect.value,
+            stripedRows: stripedRowsCheckbox.checked,
+            stripHtml: stripHtmlCheckbox.checked,
+        };
+        stripHtmlWarning.style.display = customizationOptions.stripHtml ? 'none' : 'block';
+        updateUI();
+    };
+    customizationForm.addEventListener('change', onOptionChange);
+    captionInput.addEventListener('keyup', onOptionChange);
+
+    columnVisibilityControls.addEventListener('change', (e) => {
+        const checkbox = e.target;
+        if (checkbox.type === 'checkbox') {
+            const index = parseInt(checkbox.dataset.index, 10);
+            if (checkbox.checked) {
+                visibleColumnIndices.add(index);
+            } else {
+                visibleColumnIndices.delete(index);
+            }
+            updateUI();
+        }
+    });
+
+    // Preview interactivity
+    previewSearchInput.addEventListener('input', (e) => {
+        previewState.searchTerm = e.target.value;
+        renderPreview(getFilteredData());
+    });
+
+    tablePreviewThead.addEventListener('click', (e) => {
+        const button = e.target.closest('.sort-button');
+        if (button) {
+            const colIndex = parseInt(button.dataset.index, 10);
+            if (previewState.sortColumn === colIndex) {
+                previewState.sortDirection = previewState.sortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                previewState.sortColumn = colIndex;
+                previewState.sortDirection = 'asc';
+            }
+            renderPreview(getFilteredData());
+        }
+    });
+
+    // Copy code
+    copyButton.addEventListener('click', () => {
+        navigator.clipboard.writeText(generatedHtmlCode.value).then(() => {
+            copyButtonText.textContent = 'Copied!';
+            copyButtonIcon.innerHTML = '<path d="M5 13l4 4L19 7" />';
+            setTimeout(() => {
+                copyButtonText.textContent = 'Copy Code';
+                copyButtonIcon.innerHTML = '<path d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />';
+            }, 2000);
+        });
+    });
+
+});
+</script>
+</body>
 </html>
